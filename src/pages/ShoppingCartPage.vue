@@ -1,60 +1,38 @@
 <template>
   <div class="cart-page">
-
-    <!-- ===================== PAGE CONTAINER ===================== -->
     <div class="container">
 
-      <!-- ===================== HEADER ===================== -->
       <div class="cart-header">
-        <!-- Button takes user back to lesson listings -->
         <button class="btn-back" @click="$router.push('/lessons')">
           ← Continue Shopping
         </button>
-
         <h1 class="page-title">Your Shopping Cart</h1>
       </div>
 
-      <!-- ===================== MAIN LAYOUT (ITEMS + SUMMARY) ===================== -->
       <div class="cart-layout">
 
-        <!-- ===================== LEFT SIDE: CART ITEMS ===================== -->
         <div class="cart-items-section">
 
-          <!-- If the cart is empty -->
-          <div v-if="cartLessons.length === 0" class="empty-cart">
+          <div v-if="cartStore.items.length === 0" class="empty-cart">
             <div class="empty-icon">🛒</div>
             <h3>Your cart is empty</h3>
             <p>Looks like you haven't added any activities yet.</p>
-
-            <!-- Send user back to lessons -->
             <button @click="$router.push('/lessons')" class="btn-primary">
               Browse Activities
             </button>
           </div>
 
-          <!-- If cart has items -->
           <div v-else class="items-list">
-
-            <!-- Loop through all items by filtering lessons using saved cart IDs -->
             <div 
               v-for="lesson in cartLessons" 
               :key="lesson._id" 
               class="cart-item"
             >
-
-              <!-- Activity Image -->
               <div class="item-img-wrapper">
-                <img 
-                  v-if="lesson.image" 
-                  :src="lesson.image" 
-                  alt="Activity" 
-                  class="cart-img"
-                />
+                <img v-if="lesson.image" :src="lesson.image" class="cart-img"/>
               </div>
 
-              <!-- Activity Details (Name, Location, Price, Remove Button) -->
               <div class="item-details">
-
                 <div class="item-info">
                   <span class="item-category">{{ lesson.topic }}</span>
                   <h3 class="item-title">{{ lesson.topic }} Class</h3>
@@ -63,83 +41,43 @@
 
                 <div class="item-price-block">
                   <span class="price">£{{ lesson.price }}</span>
-
-                  <!-- Remove item from cart -->
-                  <button 
-                    class="btn-remove" 
-                    @click="removeFromCart(lesson)" 
-                    title="Remove item"
-                  >
-                    <!-- Small trash bin icon -->
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="20" 
-                      height="20"
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      stroke-width="2"
-                      stroke-linecap="round" 
-                      stroke-linejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path 
-                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4
-                        a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-                      ></path>
-                    </svg>
+                  <button class="btn-remove" @click="cartStore.removeItem(lesson._id)">
+                    Remove
                   </button>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ===================== RIGHT SIDE: SUMMARY CARD ===================== -->
-        <div class="cart-summary-section" v-if="cartLessons.length > 0">
-
+        <div class="cart-summary-section" v-if="cartStore.items.length > 0">
           <div class="summary-card">
             <h3>Order Summary</h3>
 
-            <!-- Subtotal + Total -->
             <div class="summary-rows">
               <div class="summary-row">
-                <span>Items ({{ totalItems }})</span>
+                <span>Items ({{ cartStore.items.length }})</span>
                 <span>£{{ totalAmount }}</span>
               </div>
-
               <div class="summary-row total">
                 <span>Total</span>
                 <span>£{{ totalAmount }}</span>
               </div>
             </div>
 
-            <!-- ===================== CHECKOUT FORM ===================== -->
             <div class="checkout-form">
               <label>Checkout Details</label>
 
-              <!-- Full Name -->
               <div class="input-group">
-                <input 
-                  v-model="checkoutName" 
-                  type="text"
-                  placeholder="Full Name"
-                  class="input-field"
-                />
+                <input v-model="checkoutName" type="text" placeholder="Full Name" class="input-field" />
               </div>
- 
-              <!-- Phone -->
               <div class="input-group">
-                <input 
-                  v-model="checkoutPhone" 
-                  type="tel"
-                  placeholder="Phone Number"
-                  class="input-field"
-                />
+                <input v-model="checkoutPhone" type="tel" placeholder="Phone Number" class="input-field" />
+              </div> 
+              <div class="input-group">
+                <input v-model="checkoutPassword" type="password" placeholder="Password" class="input-field" />
               </div>
 
-              <!-- Checkout Button -->
               <button
                 class="btn-checkout"
                 @click="placeOrder"
@@ -156,107 +94,99 @@
 
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
+// Imports the shared Global Store
+import { cartStore } from "../store/cart";
+
 export default {
   data() {
     return {
-      lessons: [],        
-      cartItems: [],      
-      checkoutName: "",   
-      checkoutPhone: "",  
-      isSubmitting: false 
+      lessons: [],
+      checkoutName: "",
+      checkoutPhone: "",
+      checkoutPassword: "",
+      isSubmitting: false,
+      cartStore // Makes store available 
     };
   },
 
   computed: {
-    // Converts ID list to actual lesson objects
+    // Matches the IDs in the global store to the full lesson objects
     cartLessons() {
-      return this.lessons.filter(l => this.cartItems.includes(l._id));
+      return this.lessons.filter(l => this.cartStore.items.includes(l._id));
     },
 
-    // How many items in cart
-    totalItems() {
-      return this.cartLessons.length;
-    },
-
-    // Total price
     totalAmount() {
       return this.cartLessons.reduce((sum, lesson) => sum + lesson.price, 0);
     },
 
-    // Validates name + phone 
+    // [Requirement: Validation]
+    // Uses Regex to ensure Name has only letters and Phone has only numbers
     isCheckoutValid() {
       const nameValid = /^[A-Za-z\s-]+$/.test(this.checkoutName);
       const phoneValid = /^[0-9\s+]+$/.test(this.checkoutPhone);
-
-      return nameValid && phoneValid && this.cartLessons.length > 0;
+      const passwordValid = this.checkoutPassword.length > 0;
+      return nameValid && phoneValid && passwordValid && this.cartStore.items.length > 0;
     }
   },
 
   methods: {
-    // ===================== FETCH ALL LESSONS =====================
     async fetchLessons() {
       try {
-        const res = await fetch("http://localhost:8000/lessons");
-        const data = await res.json();
-
-        this.lessons = data;
-
-        // Load cart from localStorage (persistent cart)
-        const saved = JSON.parse(localStorage.getItem("cartItems") || "[]");
-
-        // Ensure IDs actually exist in backend
-        this.cartItems = saved.filter(id => this.lessons.some(l => l._id === id));
+        const res = await fetch("https://talentclub-backend.onrender.com/lessons");
+        this.lessons = await res.json();
       } 
       catch (err) {
         console.error("Error loading lessons:", err);
       }
     },
 
-    // ===================== REMOVE ITEM =====================
-    removeFromCart(lesson) {
-      // Filter out the removed lesson ID
-      this.cartItems = this.cartItems.filter(id => id !== lesson._id);
-
-      // Save updated cart
-      localStorage.setItem("cartItems", JSON.stringify(this.cartItems));
-    },
-
-    // ===================== PLACE ORDER =====================
     async placeOrder() {
       if (!this.isCheckoutValid) return;
 
-      this.isSubmitting = true; // Loading state
+      this.isSubmitting = true;
 
       try {
-        // Send order to backend
-        const res = await fetch("http://localhost:8000/orders", {
+        // [Requirement: POST Order]
+        // 1. Sends the order to the backend to be saved in MongoDB
+        const resOrder = await fetch("https://talentclub-backend.onrender.com/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lessons: this.cartItems.map(id => ({ lesson_id: id })),
+            lessons: this.cartStore.items, // Sends IDs from Store
             name: this.checkoutName.trim(),
             phone: this.checkoutPhone.trim(),
+            password: this.checkoutPassword.trim() 
           }),
         });
 
-        const data = await res.json();
+        const dataOrder = await resOrder.json();
+        if (!resOrder.ok) throw new Error(dataOrder.message || "Order failed");
 
-        if (!res.ok) throw new Error(data.message || "Order failed");
+        // [Requirement: PUT Update Spaces]
+        // 2. Loops through bought items and updates spaces for EACH lesson individually
+        for (const lesson of this.cartLessons) {
+            const newSpace = lesson.spaces > 0 ? lesson.spaces - 1 : 0;
+            await fetch(`https://talentclub-backend.onrender.com/lessons/${lesson._id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ spaces: newSpace })
+            });
+        }
 
-        alert("Order placed successfully! 🎉");
+        alert("Order placed successfully! Spaces updated.");
 
-        // Reset everything
-        this.cartItems = [];
-        localStorage.removeItem("cartItems");
+        // 3. Clear the global cart
+        this.cartStore.clear();
+        
         this.checkoutName = "";
         this.checkoutPhone = "";
+        this.checkoutPassword = ""; 
 
-        // Go back to lessons page
+        // Redirect to lessons page
         this.$router.push("/lessons");
       } 
       catch (err) {
@@ -267,11 +197,10 @@ export default {
       }
     }
   },
-
-  // Runs when page loads
+  
   mounted() {
     this.fetchLessons();
-  },
+  }
 };
 </script>
 
