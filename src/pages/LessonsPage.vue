@@ -1,15 +1,12 @@
 <template>
-  <!-- MAIN PAGE -->
   <div class="lessons-page main-page-wrap">
 
     <div class="container">
 
-      <!-- ========== PAGE HEADER ========== -->
       <div class="header-section">
         <h1 class="page-title">All Activities</h1>
         <p class="page-subtitle">Browse our complete collection of after-school programs</p>
 
-        <!-- Search Bar -->
         <div class="search-wrapper">
           <span class="search-icon">🔍</span>
           <input
@@ -21,13 +18,11 @@
         </div>
       </div>
 
-      <!-- ========== TOPICS FILTERS  ========== -->
       <div class="category-filters">
         <p class="filter-label">Filter by Category</p>
 
         <div class="boxs-row">
 
-          <!-- Show "All" box -->
           <button 
             :class="['cat-box', selectedTopic === '' ? 'active' : '']"
             @click="selectTopic('')"
@@ -35,14 +30,12 @@
             All Activities
           </button>
 
-          <!-- Create a box for each topic -->
           <button
             v-for="t in uniqueTopics"
             :key="t"
             :class="['cat-box', selectedTopic === t ? 'active' : '']"
             @click="selectTopic(t)"
           >
-            <!-- Cute icons for each category -->
             <span v-if="t === 'Music'">🎵</span>
             <span v-else-if="t === 'Art'">🎨</span>
             <span v-else-if="t === 'Photography'">📸</span>
@@ -53,21 +46,16 @@
             <span v-else-if="t === 'Biology'">🧬</span>
             <span v-else-if="t === 'Physics'">⚛️</span>
             <span v-else-if="t === 'Maths'">➗</span>
-            <span v-else>✨</span> <!-- fallback for any future subjects -->
-
-            {{ t }}
+            <span v-else>✨</span> {{ t }}
           </button>
 
         </div>
       </div>
 
-      <!-- ==========   LOCATION + PRICE + SORTING FILTERS ========== -->
       <div class="secondary-filters">
 
-        <!-- LEFT SIDE FILTERS -->
         <div class="filter-group">
 
-          <!-- Location Dropdown -->
           <select v-model="selectedLocation" @change="clearSearch()">
             <option value="">📍 All Locations</option>
             <option v-for="l in uniqueLocations" :key="l" :value="l">
@@ -75,7 +63,6 @@
             </option>
           </select>
 
-          <!-- Price Range Slider -->
           <div class="price-filter">
             <label>Max: £{{ maxPrice }}</label>
             <input
@@ -88,7 +75,6 @@
           </div>
         </div>
 
-        <!-- RIGHT SIDE SORTING -->
         <div class="sort-group">
           <span class="sort-label">Sort by:</span>
 
@@ -100,7 +86,6 @@
             <option value="topic">Topic</option>
           </select>
 
-          <!-- Sort direction (ASC / DESC) -->
           <button 
             v-if="sortKey"
             class="sort-dir-btn"
@@ -111,30 +96,25 @@
         </div>
       </div>
 
-      <!-- CART NOTICE BAR -->
-      <div class="cart-bar" v-if="cartItems.length > 0">
-        <span>{{ cartItems.length }} items in cart</span>
+      <div class="cart-bar" v-if="cartStore.items.length > 0">
+        <span>{{ cartStore.items.length }} items in cart</span>
         <button class="btn-view-cart" @click="$router.push('/cart')">
           View Cart
         </button>
       </div>
 
-      <!-- RESULTS COUNT -->
       <p class="results-count">
         Showing {{ filteredLessons.length }} activities
       </p>
 
-      <!-- ========== LESSON CARDS GRID ========== -->
       <div class="lessons-grid">
 
-        <!-- Render one card per lesson -->
         <div
           v-for="lesson in filteredLessons"
           :key="lesson._id"
           class="lesson-card"
         >
 
-          <!-- IMAGE + TAG -->
           <div class="card-image-wrapper">
             <img v-if="lesson.image" :src="lesson.image" class="lesson-img"/>
             <div v-else class="lesson-img placeholder"></div>
@@ -142,7 +122,6 @@
             <span class="topic-tag">{{ lesson.topic }}</span>
           </div>
 
-          <!-- CARD CONTENT -->
           <div class="card-content">
 
             <div class="card-header">
@@ -154,12 +133,11 @@
 
             <div class="spots-row">
               <span class="user-icon">👤</span>
-              <span :class="{'text-red': lesson.spaces < 3}">
-                {{ lesson.spaces }} spots left
+              <span :class="{'text-red': getSpaces(lesson) < 3}">
+                {{ getSpaces(lesson) }} spots left
               </span>
             </div>
 
-            <!-- PRICE + BUTTONS -->
             <div class="card-footer">
 
               <div class="price-block">
@@ -169,15 +147,9 @@
 
               <div class="action-buttons">
 
-                <!-- Details button -->
-                <button class="btn-details" @click="viewDetails(lesson)">
-                  Details
-                </button>
-
-                <!-- Add / Remove / Sold Out -->
                 <button
                   class="btn-primary"
-                  :disabled="lesson.spaces === 0 && !isInCart(lesson._id)"
+                  :disabled="getSpaces(lesson) === 0 && !cartStore.contains(lesson._id)"
                   @click="toggleCart(lesson)"
                 >
                   {{ getCartButtonLabel(lesson) }}
@@ -195,110 +167,125 @@
   </div>
 </template>
 
-
-
 <script>
+// Imports the shared reactive store for Cart logic
+import { cartStore } from "../store/cart";
+
 export default {
   data() {
     return {
       lessons: [],          
-      cartItems: [],        
       searchQuery: "",      
       selectedTopic: "",    
       selectedLocation: "", 
       maxPrice: 100,        
       maxPriceAvailable: 100, 
       sortKey: "",         
-      sortAsc: true         
+      sortAsc: true,
+      cartStore // Makes the global store available 
     };
   },
 
-  // Automatically updates filtered list 
   computed: {
-    // Get list of topics for filter buttons
+    // Generates a list of unique Topics for the filter buttons
     uniqueTopics() {
       return [...new Set(this.lessons.map(l => l.topic))];
     },
 
-    // Get list of locations for dropdown
+    // Generates a list of unique Locations for the dropdown
     uniqueLocations() {
       return [...new Set(this.lessons.map(l => l.location))];
     },
 
-    // Filter + sort lessons
+    // [Requirement: Sorting & Filtering]
+    // Handles filtering by Topic, Location, Price AND Sorting by Key
     filteredLessons() {
-      // filtering
+      // Filtering Logic
       let list = this.lessons.filter(l => {
         return (
           (!this.selectedTopic || l.topic === this.selectedTopic) &&
           (!this.selectedLocation || l.location === this.selectedLocation) &&
-          l.price <= this.maxPrice &&
-          (!this.searchQuery || l.topic.toLowerCase().includes(this.searchQuery.toLowerCase()))
+          l.price <= this.maxPrice
         );
       });
 
-      //  sorting
+      // Sorting Logic
       if (!this.sortKey) return list;
 
       return list.slice().sort((a, b) => {
         let A = a[this.sortKey], B = b[this.sortKey];
+        // Ensure case-insensitive sorting for strings
         if (typeof A === "string") A = A.toLowerCase();
         if (typeof B === "string") B = B.toLowerCase();
-        return this.sortAsc ? A > B : A < B ? -1 : 1;
+
+        // Returns -1 or 1 to determine order (Ascending/Descending)
+        if (A < B) return this.sortAsc ? -1 : 1;
+        if (A > B) return this.sortAsc ? 1 : -1;
+        return 0;
       });
     }
   },
 
+  watch: {
+    // [Requirement: Search as you type]
+    // Watches the search box input if it changes, it fetches new data
+    searchQuery(newVal) {
+      if (newVal.length > 0) {
+        // Calls the Backend Search Endpoint
+        fetch(`http://localhost:8000/search?q=${newVal}`)
+          .then(res => res.json())
+          .then(data => {
+            this.lessons = data;
+          })
+          .catch(err => console.error("Search error:", err));
+      } else {
+        // If search is cleared, reload original lessons
+        this.fetchLessons();
+      }
+    }
+  },
 
-  //METHODS
   methods: {
-    // When selecting a topic box
     selectTopic(t) {
       this.selectedTopic = t;
       this.clearSearch();
     },
 
-    // Reset search when user selects a filter
     clearSearch() {
       this.searchQuery = "";
     },
 
-    // Is lesson already in cart?
-    isInCart(id) {
-      return this.cartItems.includes(id);
+    // [Requirement: Add to Cart]
+    // Visually reduces the space count if the item is in the cart
+    getSpaces(lesson) {
+      return this.cartStore.contains(lesson._id) 
+        ? lesson.spaces - 1 
+        : lesson.spaces;
     },
 
-    // Button label logic
+    // Logic for button text: "Enroll", "Remove", or "Sold Out"
     getCartButtonLabel(lesson) {
-      if (lesson.spaces === 0 && !this.isInCart(lesson._id)) return "Sold Out";
-      return this.isInCart(lesson._id) ? "Remove" : "Enroll";
+      if (this.getSpaces(lesson) === 0 && !this.cartStore.contains(lesson._id)) return "Sold Out";
+      return this.cartStore.contains(lesson._id) ? "Remove" : "Enroll";
     },
 
-    // Add or remove from cart
+    // Toggles the item in the Global Cart Store
     toggleCart(lesson) {
-      if (this.isInCart(lesson._id)) {
-        // Remove
-        lesson.spaces++;
-        this.cartItems = this.cartItems.filter(id => id !== lesson._id);
-      } else if (lesson.spaces > 0) {
-        // Add
-        lesson.spaces--;
-        this.cartItems.push(lesson._id);
+      if (this.cartStore.contains(lesson._id)) {
+        this.cartStore.removeItem(lesson._id);
+      } else {
+        this.cartStore.addItem(lesson._id);
       }
     },
 
-    // Navigate to details page
-    viewDetails(lesson) {
-      this.$router.push({ name: "LessonDetail", params: { id: lesson._id } });
-    },
-
-    // Fetch lessons from backend
+    // [Requirement: Fetch]
+    // Fetches initial lesson data from the Backend API
     async fetchLessons() {
       try {
-        const res = await fetch("http://localhost:8000/lessons");
+        const res = await fetch("https://talentclub-backend.onrender.com/lessons");
         this.lessons = await res.json();
 
-        // Set price slider max from data
+        // Sets the Price Slider max value based on the most expensive lesson
         if (this.lessons.length > 0) {
           this.maxPriceAvailable = Math.max(...this.lessons.map(l => l.price));
           this.maxPrice = this.maxPriceAvailable;
@@ -309,44 +296,21 @@ export default {
     }
   },
 
-  //Run when page loads
-
   mounted() {
     this.fetchLessons().then(() => {
-      // Restore cart from localStorage
-      const saved = JSON.parse(localStorage.getItem("cartItems") || "[]");
-      this.cartItems = saved.filter(id => this.lessons.some(l => l._id === id));
-
-      // Optional: pre-select topic from URL (if using query params)
+      // Handles "Filter by Topic" if clicking from Home Page
       const topicFromURL = this.$route.query.topic;
       if (topicFromURL) {
         this.selectedTopic = topicFromURL;
       }
     });
-  },
-
-  //Save cart whenever it changes
-  watch: {
-    cartItems: {
-      deep: true,
-      handler() {
-        localStorage.setItem("cartItems", JSON.stringify(this.cartItems));
-      }
-    }
   }
 };
 </script>
 
-
-
-
-
-
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Global resets + font family */
+/* Base styles */
 * { 
   box-sizing: border-box; 
   font-family: 'Inter', sans-serif; 
@@ -605,20 +569,6 @@ button { cursor: pointer; }
 .btn-primary:hover { background: #ea580c; }
 .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
 
-/* View details button */
-.btn-details {
-  padding: 0.7rem 1rem;
-  border: 1px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  color: #374151;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-.btn-details:hover { 
-  background: #f9fafb; 
-  border-color: #d1d5db; 
-}
 
 /* Floating cart bar */ 
 .cart-bar {
