@@ -1,6 +1,5 @@
 <template>
   <div class="homepage">
-    <!-- ===================== Hero Section ===================== -->
     <section class="hero">
       <div class="hero-content container">
         <h1 class="hero-title">Discover Amazing<br>Activities</h1>
@@ -8,7 +7,6 @@
           From sports to arts, STEM to music—find the perfect activities to inspire and engage your child after school.
         </p>
 
-        <!-- Search Bar (clicking it goes to lessons page) -->
         <div class="hero-search-wrapper" @click="goToClasses">
           <div class="search-visual">
             <span class="search-icon">🔍</span>
@@ -17,17 +15,15 @@
           <button class="search-btn">Search</button>
         </div>
 
-        <!-- Popular Tags (quick links to lessons page) -->
-      <div class="hero-tags">
-        <span>Popular:</span>
-        <router-link class="tag-link" :to="{ path: '/lessons' }">STEM</router-link>
-        <router-link class="tag-link" :to="{ path: '/lessons' }">Art</router-link>
-        <router-link class="tag-link" :to="{ path: '/lessons' }">Music</router-link>
-        <router-link class="tag-link" :to="{ path: '/lessons' }">Languages</router-link>
-      </div>
+        <div class="hero-tags">
+          <span>Popular:</span>
+          <router-link class="tag-link" :to="{ path: '/lessons' }">STEM</router-link>
+          <router-link class="tag-link" :to="{ path: '/lessons' }">Art</router-link>
+          <router-link class="tag-link" :to="{ path: '/lessons' }">Music</router-link>
+          <router-link class="tag-link" :to="{ path: '/lessons' }">Languages</router-link>
+        </div>
       </div>
 
-      <!-- Wave on the hero page (decorative SVG) -->
       <div class="wave-separator">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
           <path
@@ -38,7 +34,6 @@
       </div>
     </section>
 
-    <!-- ===================== Categories Section ===================== -->
     <section id="categories" class="section-padding bg-white">
       <div class="container">
         <div class="section-header">
@@ -46,27 +41,22 @@
           <p>Find the perfect fit for your child's interests</p>
         </div>
 
-        <!-- Category Cards -->
         <div class="category-grid">
-          <!-- When someone clicks this card, it will go to the lessons page filtered by this category -->
           <div
             v-for="category in programCategories"
             :key="category.name"
             class="category-card"
             @click="filterByCategory(category.name)"  
           >
-          <!-- Circle with emoji for the category -->
             <div class="category-icon-circle">
               <span class="emoji-icon">{{ category.emoji }}</span>
             </div>
-            <!-- Name of the category -->
             <p class="category-name">{{ category.name }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===================== Featured Programs ===================== -->
     <section class="section-padding bg-light">
       <div class="container">
 
@@ -78,19 +68,16 @@
           <router-link to="/lessons" class="btn-text-arrow">View All Activities →</router-link>
         </div>
 
-
-        <!-- Show featured lessons if available -->
         <div v-if="featuredLessons.length > 0" class="lessons-grid">
+          
           <div v-for="lesson in featuredLessons" :key="lesson._id" class="lesson-card">
             
-            <!-- Lesson Image -->
             <div class="card-image-wrapper">
               <img v-if="lesson.image" :src="lesson.image" class="lesson-img" />
               <div v-else class="lesson-img placeholder"></div>
               <span class="topic-tag">{{ lesson.topic }}</span>
             </div>
 
-            <!-- Lesson Info -->
             <div class="card-content">
               <div class="card-header">
                 <h3 class="lesson-title">{{ lesson.topic }}</h3>
@@ -104,16 +91,12 @@
               </div>
               <div class="card-footer">
                 <span class="curr-price">£{{ lesson.price }}</span>
-                <button class="btn-card-action" @click="goToLessonDetails(lesson._id)">
-                  View Details
-                </button>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- Show message if no featured lessons -->
         <div v-else>
           <p>No classes currently featured. Check back soon!</p>
         </div>
@@ -121,16 +104,13 @@
       </div>
     </section>
 
-   <!-- ===================== Features Section ===================== -->
-    <section class="section-padding bg-white">
+   <section class="section-padding bg-white">
       <div class="container">
         <div class="section-header">
           <h2>Why Families Choose Us</h2>
         </div>
 
         <div class="features-grid">
-
-          <!-- Feature 1 -->
           <div class="feature-box">
             <div class="feature-icon-wrap">
               <span class="feature-emoji">👩‍🏫</span>
@@ -139,7 +119,6 @@
             <p>Certified instructors ensuring quality learning.</p>
           </div>
 
-          <!-- Feature 2 -->
           <div class="feature-box">
             <div class="feature-icon-wrap">
               <span class="feature-emoji">🛡️</span>
@@ -148,7 +127,6 @@
             <p>All activities are vetted for safety and comfort.</p>
           </div>
 
-          <!-- Feature 3 -->
           <div class="feature-box">
             <div class="feature-icon-wrap">
               <span class="feature-emoji">📅</span>
@@ -168,7 +146,7 @@ export default {
   name: "HomePage",
   data() {
     return {
-      // List of categories shown in Explore Categories
+      // Static data for the Categories section
       programCategories: [
         { name: "Physics", emoji: "🧪" },
         { name: "Music", emoji: "🎵" },
@@ -177,42 +155,42 @@ export default {
         { name: "Art", emoji: "🎨" },
         { name: "Photography", emoji: "📷" }
       ],
-      lessons: []  // Lessons fetched from backend API
+      lessons: []  // Will store the live data from the backend
     };
   },
   computed: {
-    // Only show first 3 lessons that have spots left
+    // Filter Logic:
+    // Checks if spaces are available and slices the array to show only the top 3 results
     featuredLessons() {
       return this.lessons.filter(l => l.spaces > 0).slice(0, 3);
     }
   },
   methods: {
-    // Navigate to lesson details page
-    goToLessonDetails(id) {
-      this.$router.push({ name: "LessonDetail", params: { id } });
-    },
-    // Navigate to lessons page (all lessons)
+    // Helper to navigate to the main shop page
     goToClasses() {
       this.$router.push("/lessons");
     },
-    // Navigate to lessons page filtered by category
+    
+    // Helper that navigates and adds a filter query to the URL
     filterByCategory(category) {
       this.$router.push({ path: "/lessons", query: { topic: category } });
     },
-    // Fetch lessons from backend
-async fetchLessons() {
-  try {
-    const res = await fetch("http://localhost:8000/lessons");
-    if (!res.ok) throw new Error("Failed to fetch lessons");
-    this.lessons = await res.json();
-  } catch (err) {
-    console.error("Error fetching lessons:", err);
-    this.lessons = [];
-  }
-}
+    
+    // [Requirement: Fetch]
+    // Retrieves lesson data from the Node.js/Express Backend
+    async fetchLessons() {
+      try {
+        const res = await fetch("https://talentclub-backend.onrender.com/lessons");
+        if (!res.ok) throw new Error("Failed to fetch lessons");
+        this.lessons = await res.json();
+      } catch (err) {
+        console.error("Error fetching lessons:", err);
+        this.lessons = [];
+      }
+    }
   },
   mounted() {
-    // Fetch lessons when page loads
+    // Load data as soon as the component is on screen
     this.fetchLessons();
   }
 };
@@ -224,7 +202,7 @@ async fetchLessons() {
 /* Base styles */
 * {
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif; /* default font */
+  font-family: 'Inter', sans-serif; 
 }
 
 .homepage {
