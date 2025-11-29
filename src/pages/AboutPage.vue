@@ -1,7 +1,6 @@
 <template>
   <div class="about-page">
 
-    <!-- ===================== ABOUT HEADER ===================== -->
     <section class="about-header">
       <div class="container">
         <h1>About TalentClub</h1>
@@ -12,12 +11,9 @@
       </div>
     </section>
 
-    <!-- ===================== MISSION & STATS SECTION ===================== -->
-
     <section class="mission-section">
       <div class="container mission-grid">
 
-        <!-- Mission Statement -->
         <div class="mission-text">
           <h2>Our Mission</h2>
           <p>
@@ -28,7 +24,6 @@
           </p>
         </div>
 
-        <!-- Stats Cards -->
         <div class="stats-grid">
           <div class="stat-card">
             <h3>500+</h3>
@@ -51,7 +46,6 @@
       </div>
     </section>
 
-    <!-- ===================== CORE VALUES SECTION ===================== -->
     <section class="values-section">
       <div class="container">
         <div class="section-header">
@@ -59,9 +53,10 @@
         </div>
 
         <div class="values-grid">
-          <!-- Value Card Component -->
           <div class="value-card" v-for="value in coreValues" :key="value.title">
+            
             <div class="icon-box" v-html="value.icon"></div>
+            
             <h3>{{ value.title }}</h3>
             <p>{{ value.description }}</p>
           </div>
@@ -69,13 +64,13 @@
       </div>
     </section>
 
-    <!-- ===================== READY TO GET STARTED SECTION ===================== -->
     <section class="ready-section">
       <div class="container ready-content">
         <h2>Ready to Get Started?</h2>
         <p>
           Join hundreds of families who trust TalentClub for their children's educational enrichment.
         </p>
+        
         <router-link to="/lessons" class="btn-white">Browse Programs</router-link>
       </div>
     </section>
@@ -88,7 +83,7 @@ export default {
   name: "AboutPage",
   data() {
     return {
-      // Core values data
+      // We store this here so we can loop over it in the template above
       coreValues: [
         {
           title: "Excellence",
@@ -110,7 +105,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
