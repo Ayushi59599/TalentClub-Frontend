@@ -96,7 +96,6 @@
     </div>
   </div>
 </template>
-
 <script>
 // Imports the shared Global Store
 import { cartStore } from "../store/cart";
@@ -124,7 +123,6 @@ export default {
     },
 
     // [Requirement: Validation]
-    // Uses Regex to ensure Name has only letters and Phone has only numbers
     isCheckoutValid() {
       const nameValid = /^[A-Za-z\s-]+$/.test(this.checkoutName);
       const phoneValid = /^[0-9\s+]+$/.test(this.checkoutPhone);
@@ -133,7 +131,9 @@ export default {
     }
   },
 
-  methods: {
+
+  methods: { 
+    
     async fetchLessons() {
       try {
         const res = await fetch("https://talentclub-backend.onrender.com/lessons");
@@ -150,13 +150,22 @@ export default {
       this.isSubmitting = true;
 
       try {
+        // [FIX] Prepares detailed lesson info for the order
+        // This ensures the Order History page sees "Math" instead of "68ff..."
+        const orderDetails = this.cartLessons.map(lesson => ({
+            id: lesson._id,
+            topic: lesson.topic,
+            location: lesson.location,
+            price: lesson.price,
+            image: lesson.image
+        }));
+
         // [Requirement: POST Order]
-        // 1. Sends the order to the backend to be saved in MongoDB
         const resOrder = await fetch("https://talentclub-backend.onrender.com/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lessons: this.cartStore.items, // Sends IDs from Store
+            lessons: orderDetails, // <--- Sending the detailed list
             name: this.checkoutName.trim(),
             phone: this.checkoutPhone.trim(),
             password: this.checkoutPassword.trim() 
@@ -167,7 +176,7 @@ export default {
         if (!resOrder.ok) throw new Error(dataOrder.message || "Order failed");
 
         // [Requirement: PUT Update Spaces]
-        // 2. Loops through bought items and updates spaces for EACH lesson individually
+        // Loops through bought items and updates spaces for EACH lesson individually
         for (const lesson of this.cartLessons) {
             const newSpace = lesson.spaces > 0 ? lesson.spaces - 1 : 0;
             await fetch(`https://talentclub-backend.onrender.com/lessons/${lesson._id}`, {
@@ -179,7 +188,7 @@ export default {
 
         alert("Order placed successfully! Spaces updated.");
 
-        // 3. Clear the global cart
+        // Clear the global cart
         this.cartStore.clear();
         
         this.checkoutName = "";
@@ -196,8 +205,8 @@ export default {
         this.isSubmitting = false;
       }
     }
-  },
-  
+  }, 
+
   mounted() {
     this.fetchLessons();
   }
@@ -388,7 +397,7 @@ export default {
   color: #ef4444;     
   border: none;
   border-radius: 8px;
-  width: 36px;
+  width: 60px;
   height: 36px;
   display: flex;
   align-items: center;

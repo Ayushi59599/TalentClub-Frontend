@@ -4,7 +4,7 @@
       <div class="hero-content container">
         <h1 class="hero-title">Discover Amazing<br>Activities</h1>
         <p class="hero-subtext">
-          From sports to arts, STEM to music—find the perfect activities to inspire and engage your child after school.
+          From sports to arts, STEM to music find the perfect activities to inspire and engage your child after school.
         </p>
 
         <div class="hero-search-wrapper" @click="goToClasses">

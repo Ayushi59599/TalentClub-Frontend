@@ -76,13 +76,18 @@
                 <span class="order-date">{{ formatDate(order.createdAt) }}</span>
               </div>
 
-              <div class="order-items">
+            <div class="order-items">
+  
                 <div v-for="(lesson, idx) in order.lessons" :key="idx" class="order-item-row">
-                  <div class="item-info">
-                    <h4>{{ lesson.topic || lesson }}</h4>
-                  </div>
+                    
+                    <img v-if="lesson.image" :src="lesson.image" style="width: 50px; height: 50px; border-radius: 5px; object-fit: cover; margin-right: 10px;">
+                    
+                    <div class="item-info">
+                    <h4>{{ lesson.topic }}</h4>
+                    <p>📍 {{ lesson.location }} | £{{ lesson.price }}</p>
+                    </div>
                 </div>
-              </div>
+                </div>
             </div>
           </div>
 
@@ -131,7 +136,6 @@ export default {
     if (this.userStore.token) this.fetchDashboardData();
   },
   methods: {
-    // [Requirement: Form Validation]
     // Handles the login logic
     async handleLogin() {
       this.loading = true;
@@ -144,7 +148,7 @@ export default {
 
         // Check if the entered credentials match a user in the database
         const user = allUsers.find(
-          u => u.name === this.form.name.trim() &&
+             u => u.name.toLowerCase() === this.form.name.trim().toLowerCase() &&
                u.phone.replace(/\s/g, '') === this.form.phone.replace(/\s/g, '') &&
                u.password === this.form.password
         );
@@ -164,16 +168,15 @@ export default {
 
     // Logs the user out
     handleLogout() {
-      // 1. Clear the login state in the global store
+      // Clear the login state in the global store
       this.userStore.clearUser();
       
-      // 2. Reset the input form
+      // Reset the input form
       this.form = { name: "", phone: "", password: "" };
 
-      // Note: No redirect needed. The v-if in the template automatically switches back to the Login form.
+      
     },
 
-    // [Requirement: Fetch]
     // Gets the latest data from the MongoDB backend
     async fetchDashboardData() {
       this.loadingOrders = true;
@@ -187,7 +190,6 @@ export default {
       }
     },
 
-    // Helper to make the Date string look nice
     formatDate(dateStr) {
       const date = new Date(dateStr);
       return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;

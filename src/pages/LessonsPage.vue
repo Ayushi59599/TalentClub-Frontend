@@ -214,9 +214,6 @@ export default {
 
       return list.slice().sort((a, b) => {
         let A = a[this.sortKey], B = b[this.sortKey];
-        // Ensure case-insensitive sorting for strings
-        if (typeof A === "string") A = A.toLowerCase();
-        if (typeof B === "string") B = B.toLowerCase();
 
         // Returns -1 or 1 to determine order (Ascending/Descending)
         if (A < B) return this.sortAsc ? -1 : 1;
@@ -232,7 +229,7 @@ export default {
     searchQuery(newVal) {
       if (newVal.length > 0) {
         // Calls the Backend Search Endpoint
-        fetch(`http://localhost:8000/search?q=${newVal}`)
+        fetch(`https://talentclub-backend.onrender.com/search?q=${newVal}`)
           .then(res => res.json())
           .then(data => {
             this.lessons = data;
