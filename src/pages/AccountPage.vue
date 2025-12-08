@@ -100,7 +100,6 @@
 </template>
 
 <script>
-// Imports the Global Store to manage User Login State
 import { userStore } from "../store/user";
 
 export default {
@@ -115,38 +114,34 @@ export default {
     };
   },
   computed: {
-    // Filters the big list of orders to find only those belonging to the current user
+    // Filters orders to find those belonging to the current user
     myOrders() {
       if (!this.userStore.user?.phone) return [];
       
       // Remove spaces from phone number for accurate matching
       const phone = this.userStore.user.phone.replace(/\s/g, '');
       
-      // Find the user object in the downloaded data
+      // Find the user object
       const user = this.orders.find(u => u.phone && u.phone.replace(/\s/g, '') === phone);
       return user?.orders || [];
     },
-    // Calculates total classes booked by summing up lessons in every order
     totalClassesBooked() {
       return this.myOrders.reduce((total, order) => total + (order.lessons?.length || 0), 0);
     }
   },
   mounted() {
-    // If the user is already logged in, load their dashboard data immediately
     if (this.userStore.token) this.fetchDashboardData();
   },
   methods: {
-    // Handles the login logic
     async handleLogin() {
       this.loading = true;
       this.errorMsg = "";
 
       try {
-        // Fetch all users from the backend
         const res = await fetch("https://talentclub-backend.onrender.com/orders");
         const allUsers = await res.json();
 
-        // Check if the entered credentials match a user in the database
+        // Check if entered data matches a user in the database
         const user = allUsers.find(
              u => u.name.toLowerCase() === this.form.name.trim().toLowerCase() &&
                u.phone.replace(/\s/g, '') === this.form.phone.replace(/\s/g, '') &&
@@ -155,8 +150,7 @@ export default {
 
         if (!user) throw new Error("Invalid name, phone, or password");
 
-        // Login successful: Save user to Global Store
-        this.userStore.login({ name: user.name, phone: user.phone }, "mock-token-123");
+        this.userStore.login({ name: user.name, phone: user.phone }, "mock-token");
         this.fetchDashboardData();
 
       } catch (err) {
@@ -168,16 +162,10 @@ export default {
 
     // Logs the user out
     handleLogout() {
-      // Clear the login state in the global store
       this.userStore.clearUser();
-      
-      // Reset the input form
       this.form = { name: "", phone: "", password: "" };
-
-      
     },
 
-    // Gets the latest data from the MongoDB backend
     async fetchDashboardData() {
       this.loadingOrders = true;
       try {
@@ -200,7 +188,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Base page formatting */
 * { 
   box-sizing: border-box; 
   font-family: 'Inter', sans-serif; 
@@ -218,7 +205,7 @@ export default {
   margin: 0 auto; 
 }
 
-/* Auth View (Login) centering */
+/* Auth View */
 .auth-view { 
   display: flex; 
   justify-content: center; 
@@ -226,7 +213,7 @@ export default {
   min-height: 60vh; 
 }
 
-/* Login card styling */
+/* Login card */
 .auth-card {
   background: white; 
   padding: 2.5rem; 
@@ -238,7 +225,6 @@ export default {
   text-align: center;
 }
 
-/* Icon above login title */
 .icon-circle {
   width: 50px; 
   height: 50px; 

@@ -168,7 +168,6 @@
 </template>
 
 <script>
-// Imports the shared reactive store for Cart logic
 import { cartStore } from "../store/cart";
 
 export default {
@@ -182,23 +181,18 @@ export default {
       maxPriceAvailable: 100, 
       sortKey: "",         
       sortAsc: true,
-      cartStore // Makes the global store available 
+      cartStore 
     };
   },
 
   computed: {
-    // Generates a list of unique Topics for the filter buttons
     uniqueTopics() {
       return [...new Set(this.lessons.map(l => l.topic))];
     },
-
-    // Generates a list of unique Locations for the dropdown
     uniqueLocations() {
       return [...new Set(this.lessons.map(l => l.location))];
     },
 
-    // [Requirement: Sorting & Filtering]
-    // Handles filtering by Topic, Location, Price AND Sorting by Key
     filteredLessons() {
       // Filtering Logic
       let list = this.lessons.filter(l => {
@@ -215,7 +209,6 @@ export default {
       return list.slice().sort((a, b) => {
         let A = a[this.sortKey], B = b[this.sortKey];
 
-        // Returns -1 or 1 to determine order (Ascending/Descending)
         if (A < B) return this.sortAsc ? -1 : 1;
         if (A > B) return this.sortAsc ? 1 : -1;
         return 0;
@@ -224,8 +217,7 @@ export default {
   },
 
   watch: {
-    // [Requirement: Search as you type]
-    // Watches the search box input if it changes, it fetches new data
+    //Search as you type
     searchQuery(newVal) {
       if (newVal.length > 0) {
         // Calls the Backend Search Endpoint
@@ -236,7 +228,7 @@ export default {
           })
           .catch(err => console.error("Search error:", err));
       } else {
-        // If search is cleared, reload original lessons
+        // If search is cleared then reload original lessons
         this.fetchLessons();
       }
     }
@@ -252,7 +244,6 @@ export default {
       this.searchQuery = "";
     },
 
-    // [Requirement: Add to Cart]
     // Visually reduces the space count if the item is in the cart
     getSpaces(lesson) {
       return this.cartStore.contains(lesson._id) 
@@ -260,13 +251,12 @@ export default {
         : lesson.spaces;
     },
 
-    // Logic for button text: "Enroll", "Remove", or "Sold Out"
+    // Logic for button text
     getCartButtonLabel(lesson) {
       if (this.getSpaces(lesson) === 0 && !this.cartStore.contains(lesson._id)) return "Sold Out";
       return this.cartStore.contains(lesson._id) ? "Remove" : "Enroll";
     },
 
-    // Toggles the item in the Global Cart Store
     toggleCart(lesson) {
       if (this.cartStore.contains(lesson._id)) {
         this.cartStore.removeItem(lesson._id);
@@ -275,7 +265,6 @@ export default {
       }
     },
 
-    // [Requirement: Fetch]
     // Fetches initial lesson data from the Backend API
     async fetchLessons() {
       try {
@@ -307,13 +296,11 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-/* Base styles */
 * { 
   box-sizing: border-box; 
   font-family: 'Inter', sans-serif; 
 }
 
-/* Main wrapper */
 .main-page-wrap {
   min-height: 100vh;
   padding: 2rem 1rem;

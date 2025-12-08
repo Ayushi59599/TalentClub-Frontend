@@ -97,7 +97,6 @@
   </div>
 </template>
 <script>
-// Imports the shared Global Store
 import { cartStore } from "../store/cart";
 
 export default {
@@ -108,12 +107,11 @@ export default {
       checkoutPhone: "",
       checkoutPassword: "",
       isSubmitting: false,
-      cartStore // Makes store available 
+      cartStore 
     };
   },
 
   computed: {
-    // Matches the IDs in the global store to the full lesson objects
     cartLessons() {
       return this.lessons.filter(l => this.cartStore.items.includes(l._id));
     },
@@ -122,7 +120,7 @@ export default {
       return this.cartLessons.reduce((sum, lesson) => sum + lesson.price, 0);
     },
 
-    // [Requirement: Validation]
+    //Validation
     isCheckoutValid() {
       const nameValid = /^[A-Za-z\s-]+$/.test(this.checkoutName);
       const phoneValid = /^[0-9\s+]+$/.test(this.checkoutPhone);
@@ -150,8 +148,6 @@ export default {
       this.isSubmitting = true;
 
       try {
-        // [FIX] Prepares detailed lesson info for the order
-        // This ensures the Order History page sees "Math" instead of "68ff..."
         const orderDetails = this.cartLessons.map(lesson => ({
             id: lesson._id,
             topic: lesson.topic,
@@ -160,12 +156,12 @@ export default {
             image: lesson.image
         }));
 
-        // [Requirement: POST Order]
+        //POST Order
         const resOrder = await fetch("https://talentclub-backend.onrender.com/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            lessons: orderDetails, // <--- Sending the detailed list
+            lessons: orderDetails,
             name: this.checkoutName.trim(),
             phone: this.checkoutPhone.trim(),
             password: this.checkoutPassword.trim() 
@@ -175,8 +171,7 @@ export default {
         const dataOrder = await resOrder.json();
         if (!resOrder.ok) throw new Error(dataOrder.message || "Order failed");
 
-        // [Requirement: PUT Update Spaces]
-        // Loops through bought items and updates spaces for EACH lesson individually
+        //PUT Update Spaces
         for (const lesson of this.cartLessons) {
             const newSpace = lesson.spaces > 0 ? lesson.spaces - 1 : 0;
             await fetch(`https://talentclub-backend.onrender.com/lessons/${lesson._id}`, {
@@ -190,7 +185,6 @@ export default {
 
         // Clear the global cart
         this.cartStore.clear();
-        
         this.checkoutName = "";
         this.checkoutPhone = "";
         this.checkoutPassword = ""; 
@@ -216,7 +210,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* Base styles */
 * { 
   box-sizing: border-box; 
   font-family: 'Inter', sans-serif; 

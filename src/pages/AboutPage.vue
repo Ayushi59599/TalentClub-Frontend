@@ -83,7 +83,6 @@ export default {
   name: "AboutPage",
   data() {
     return {
-      // We store this here so we can loop over it in the template above
       coreValues: [
         {
           title: "Excellence",
@@ -109,7 +108,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Base Styles */
 * {
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
@@ -262,7 +260,6 @@ export default {
 }
 
 /* Ready to get started Section */
-
 .ready-section {
   background: #793e13;      
   color: #ffffff;           
@@ -299,7 +296,7 @@ export default {
   background: #f3f4f6;
 }
 
-/* Responsiveness  */
+/* Responsiveness */
 @media (max-width: 900px) {
   .mission-grid {
     grid-template-columns: 1fr;

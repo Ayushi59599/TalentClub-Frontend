@@ -1,9 +1,5 @@
 import { reactive } from 'vue';
-
-// [Requirement: State Management]
-// When data changes here, all components update automatically.
 export const cartStore = reactive({
-  // Load items from LocalStorage so the cart persists on page refresh
   items: JSON.parse(localStorage.getItem("cartItems") || "[]"),
 
   // Adds an item ID to the array
@@ -31,7 +27,6 @@ export const cartStore = reactive({
     this.save();
   },
 
-  // Saves the current state to the Browser's LocalStorage
   save() {
     localStorage.setItem("cartItems", JSON.stringify(this.items));
   }

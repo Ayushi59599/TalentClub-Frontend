@@ -1,4 +1,3 @@
-// src/store/user.js
 import { reactive } from 'vue';
 
 export const userStore = reactive({
@@ -11,7 +10,7 @@ export const userStore = reactive({
     this.token = token;
   },
 
-  // Clear login info (Logout)
+  // Clear login info 
   clearUser() {
     this.user = null;
     this.token = null;

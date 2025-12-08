@@ -146,7 +146,7 @@ export default {
   name: "HomePage",
   data() {
     return {
-      // Static data for the Categories section
+      // used emojis instad of icons
       programCategories: [
         { name: "Physics", emoji: "🧪" },
         { name: "Music", emoji: "🎵" },
@@ -155,29 +155,24 @@ export default {
         { name: "Art", emoji: "🎨" },
         { name: "Photography", emoji: "📷" }
       ],
-      lessons: []  // Will store the live data from the backend
+      lessons: [] 
     };
   },
   computed: {
-    // Filter Logic:
-    // Checks if spaces are available and slices the array to show only the top 3 results
+    // Filter Logic
     featuredLessons() {
       return this.lessons.filter(l => l.spaces > 0).slice(0, 3);
     }
   },
   methods: {
-    // Helper to navigate to the main shop page
     goToClasses() {
       this.$router.push("/lessons");
     },
     
-    // Helper that navigates and adds a filter query to the URL
     filterByCategory(category) {
       this.$router.push({ path: "/lessons", query: { topic: category } });
     },
     
-    // [Requirement: Fetch]
-    // Retrieves lesson data from the Node.js/Express Backend
     async fetchLessons() {
       try {
         const res = await fetch("https://talentclub-backend.onrender.com/lessons");
@@ -190,7 +185,6 @@ export default {
     }
   },
   mounted() {
-    // Load data as soon as the component is on screen
     this.fetchLessons();
   }
 };
@@ -199,7 +193,6 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Base styles */
 * {
   box-sizing: border-box;
   font-family: 'Inter', sans-serif; 
@@ -249,7 +242,6 @@ export default {
 .text-left { text-align: left; }
 
 /* Hero Section */
-
 .hero {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
   padding: 8rem 0 10rem 0; 

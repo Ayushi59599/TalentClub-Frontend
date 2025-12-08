@@ -22,7 +22,6 @@
 </template>
 
 <script>
-// Imports the shared Cart Store so the Navbar stays in sync with the Buy Button
 import { cartStore } from "../store/cart";
 
 export default {
@@ -31,12 +30,8 @@ export default {
   },
   methods: {
     handleCartClick() {
-      // [Requirement: Cart Button Logic]
-      // If the cart is empty, do nothing
+      //Cart Button Logic
       if (this.cartStore.items.length === 0) return;
-
-      // [Requirement: Cart Toggle]
-      // If we are already on the Cart page, go back to Lessons else go to the Cart page.
       if (this.$route.path === '/cart') {
         this.$router.push('/lessons');
       } else {
@@ -48,7 +43,7 @@ export default {
 </script>
 
 <style scoped>
-/* Navbar Container styling */
+/* Navbar */
 .navbar {
   display: flex;
   align-items: center;
@@ -61,7 +56,6 @@ export default {
   transition: background 0.3s;
 }
 
-/* Brand/Logo styling */
 .navbar-brand {
   font-weight: 700;
   font-size: 1.6rem;
@@ -75,7 +69,6 @@ export default {
   color: #c7d2fe;
 }
 
-/* Navigation Links List */
 .navbar-links {
   list-style: none;
   display: flex;
@@ -85,7 +78,6 @@ export default {
   padding: 0;
 }
 
-/* Individual Link styling */
 .navbar-links li a {
   text-decoration: none;
   color: #e0e7ff;
@@ -102,7 +94,7 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Cart icon styling */
+/* Cart */
 .cart-icon {
   position: relative;
   cursor: pointer;
@@ -119,7 +111,6 @@ export default {
   transform: translateY(-2px);
 }
 
-/* The blue badge showing the number of items */
 .cart-count {
   position: absolute;
   top: -8px;

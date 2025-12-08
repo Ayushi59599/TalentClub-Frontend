@@ -16,7 +16,6 @@ export default {
   components: { NavBar },
   methods: {
     toggleCart() {
-      // If we are already on cart, go back to lessons
       if (this.$route.path === '/cart') {
         this.$router.push('/lessons');
       } else {
